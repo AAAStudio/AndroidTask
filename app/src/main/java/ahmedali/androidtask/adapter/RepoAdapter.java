@@ -1,12 +1,14 @@
 package ahmedali.androidtask.adapter;
 
 import android.content.Context;
+import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.List;
@@ -35,25 +37,47 @@ public class RepoAdapter extends RecyclerView.Adapter<RepoAdapter.MyViewHolder> 
 
     @Override
     public RepoAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.repo_model, parent, false);
+        View itemView;
+        if (viewType == R.layout.repo_model) {
+            itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.repo_model, parent, false);
+        } else {
+            itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.loading, parent, false);
+        }
         return new MyViewHolder(itemView);
     }
 
     @Override
-    public void onBindViewHolder(RepoAdapter.MyViewHolder holder, int position) {
-        RepoModel currentobj = models.get(position);
-        holder.setData(currentobj, position);
-        holder.bind(models.get(position), listener);
+    public void onBindViewHolder(final RepoAdapter.MyViewHolder holder, int position) {
+        if (position != models.size()) {
+            RepoModel currentobj = models.get(position);
+            holder.setData(currentobj, position);
+            holder.bind(models.get(position), listener);
+        } else {
+            holder.loading.setVisibility(View.VISIBLE);
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    holder.loading.setVisibility(View.GONE);
+                }
+            }, 1000);
+        }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return (position == models.size()) ? R.layout.loading : R.layout.repo_model;
     }
 
     @Override
     public int getItemCount() {
-        return models.size();
+        return models.size()+1;
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         private CardView repoCard;
         private TextView repoName, ownerName, description;
+        public ProgressBar loading;
 
         public MyViewHolder(View itemView) {
             super(itemView);
@@ -61,6 +85,7 @@ public class RepoAdapter extends RecyclerView.Adapter<RepoAdapter.MyViewHolder> 
             repoName = (TextView) itemView.findViewById(R.id.repoName);
             ownerName = (TextView) itemView.findViewById(R.id.ownerName);
             description = (TextView) itemView.findViewById(R.id.description);
+            loading = (ProgressBar) itemView.findViewById(R.id.loading);
         }
 
         public void setData(RepoModel currentobj, int position) {
