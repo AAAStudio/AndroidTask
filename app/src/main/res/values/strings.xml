@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Android Task</string>
+    <string name="owner_name">Owner Name :</string>
+    <string name="description">Description :</string>
 </resources>
